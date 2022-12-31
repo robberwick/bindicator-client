@@ -1,9 +1,19 @@
 from machine import Pin
 import urequests
 import time
+from pinmap import pin_map
 
-recycle_pin = Pin(5, Pin.OUT)  # D1
-refuse_pin = Pin(4, Pin.OUT)  # D2
+def get_board_type():
+    with open('board.txt') as fp:
+        board_type = fp.read()
+    return board_type.lower()
+
+recycle, refuse = pin_map[get_board_type()]
+
+# green
+recycle_pin = Pin(5, Pin.OUT)  # D1 (D1 or 32
+# red
+refuse_pin = Pin(4, Pin.OUT)  # D2 or 5
 
 
 def get_next():
