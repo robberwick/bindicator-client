@@ -1,20 +1,9 @@
 from machine import Pin
+from neopixel import NeoPixel
 import urequests
 import time
-from pinmap import pin_map
 
-def get_board_type():
-    with open('board.txt') as fp:
-        board_type = fp.read()
-    return board_type.lower()
-
-recycle, refuse = pin_map[get_board_type()]
-
-# green
-recycle_pin = Pin(5, Pin.OUT)  # D1 (D1 or 32
-# red
-refuse_pin = Pin(4, Pin.OUT)  # D2 or 5
-
+np = NeoPixel(Pin(13), 1) # D7
 
 def get_next():
     resp = urequests.get('http://bindicator-api.robberwick.com')
@@ -22,21 +11,20 @@ def get_next():
     resp.close()
     return data
 
-
 def update():
     print('fetching...')
     data = get_next()
     print('fetched:', data)
+    colour = (0,0,0)
 
-    led_pin = recycle_pin if data['service'].lower() == 'recycling' else refuse_pin
+    if data['isDue']:
+        colour = (0,255,0) if data['service'].lower() == 'recycling' else (255,0,0)
 
-    # turn both LEDs off
-    recycle_pin(0)
-    refuse_pin(0)
-    led_pin(data['isDue'])
-
+    np.fill(colour)
+    np.write()
 
 while True:
     update()
     time.sleep(3600)
+
 
